@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define WINNING_POSITION 100
+
+// Function to simulate the dice roll (1–6)
+int rollDice() {
+    return (rand() % 6) + 1;
+}
+
+// Function to move player to new position after hitting snake or ladder
+int checkSnakeOrLadder(int position) {
+    switch (position) {
+        // Ladders
+        case 3: return 22;
+        case 5: return 8;
+        case 11: return 26;
+        case 20: return 29;
+
+        // Snakes
+        case 17: return 4;
+        case 19: return 7;
+        case 21: return 9;
+        case 27: return 1;
+
+        default: return position;
+    }
+}
+
+// Function for each player's turn
+void playerTurn(const char *playerName, int *position) {
+    printf("\n%s's turn. Press Enter to roll the dice...", playerName);
+    getchar();
+
+    int dice = rollDice();
+    printf("%s rolled a %d.\n", playerName, dice);
+
+    if (*position + dice <= WINNING_POSITION) {
+        *position += dice;
+        printf("%s moved to %d.\n", playerName, *position);
+        int newPosition = checkSnakeOrLadder(*position);
+        if (newPosition != *position) {
+            if (newPosition > *position) {
+                printf("🎉 Ladder! %s climbs up to %d.\n", playerName, newPosition);
+            } else {
+                printf("🐍 Snake! %s slides down to %d.\n", playerName, newPosition);
+            }
+            *position = newPosition;
+        }
+    } else {
+        printf("⚠️  Cannot move. Need exact roll to reach 100.\n");
+    }
+}
+
+int main() {
+    int pos1 = 0, pos2 = 0;
+    char player1[50], player2[50];
+
+    srand(time(NULL));  // Seed random number generator
+
+    printf("=== 🐍 Snake and Ladder Game 🎲 ===\n");
+
+    printf("Enter Player 1 name: ");
+    fgets(player1, sizeof(player1), stdin);
+    printf("Enter Player 2 name: ");
+    fgets(player2, sizeof(player2), stdin);
+
+    // Remove trailing newline from input
+    player1[strcspn(player1, "\n")] = 0;
+    player2[strcspn(player2, "\n")] = 0;
+
+    while (pos1 < WINNING_POSITION && pos2 < WINNING_POSITION) {
+        playerTurn(player1, &pos1);
+        if (pos1 >= WINNING_POSITION) {
+            printf("\n🏆 %s wins the game! 🏆\n", player1);
+            break;
+        }
+
+        playerTurn(player2, &pos2);
+        if (pos2 >= WINNING_POSITION) {
+            printf("\n🏆 %s wins the game! 🏆\n", player2);
+            break;
+        }
+    }
+
+    return 0;
+}
