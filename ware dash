@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wareef Dashboard</title>
+
+  <style>
+    :root{
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 8px 24px rgba(17,24,39,.08);
+      --radius: 16px;
+
+      /* Wareef brand accents (adjust to match your brand) */
+      --primary: #12a369;
+      --primary-2: #0f8c5a;
+
+      --good: #16a34a;
+      --warn: #f59e0b;
+      --bad:  #ef4444;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:var(--bg);
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      min-height:100vh;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      padding:20px;
+      border-right:1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(17,24,39,.04);
+      margin-bottom:18px;
+    }
+    .brand img{
+      width:42px;
+      height:42px;
+      object-fit:contain;
+    }
+    .brand .name{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+    .brand .name strong{ font-size:16px; letter-spacing:.2px; }
+    .brand .name span{ font-size:12px; color:var(--muted); }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .nav a{
+      text-decoration:none;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid transparent;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+    }
+    .nav a:hover{
+      background:#fff;
+      border-color: var(--border);
+    }
+    .nav a.active{
+      background: rgba(18,163,105,.10);
+      border-color: rgba(18,163,105,.25);
+    }
+    .pill{
+      font-size:12px;
+      color:#fff;
+      padding:2px 8px;
+      border-radius:999px;
+      background: var(--primary);
+    }
+
+    /* Main */
+    .main{
+      padding:22px 22px 28px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .search{
+      flex:1;
+      max-width:560px;
+      position:relative;
+    }
+    .search input{
+      width:100%;
+      padding:12px 14px 12px 42px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      outline:none;
+      box-shadow: 0 6px 20px rgba(17,24,39,.04);
+      font-size:14px;
+    }
+    .search .icon{
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:14px;
+      cursor:pointer;
+      box-shadow: 0 6px 20px rgba(17,24,39,.04);
+    }
+    .btn.primary{
+      border-color: rgba(18,163,105,.35);
+      background: rgba(18,163,105,.10);
+      color: var(--primary-2);
+      font-weight:600;
+    }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .card h3{
+      margin:0 0 8px 0;
+      font-size:14px;
+      color:var(--muted);
+      font-weight:600;
+    }
+    .metric{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .metric .value{
+      font-size:26px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .metric .delta{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color: var(--muted);
+      background:#fff;
+    }
+    .delta.good{ color: var(--good); border-color: rgba(22,163,74,.25); background: rgba(22,163,74,.08); }
+    .delta.warn{ color: var(--warn); border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.10); }
+    .delta.bad { color: var(--bad);  border-color: rgba(239,68,68,.25); background: rgba(239,68,68,.10); }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin: 6px 0 10px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .section-title span{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Simple chart (pure CSS bars) */
+    .bars{
+      display:flex;
+      align-items:flex-end;
+      gap:10px;
+      height:170px;
+      padding:12px 6px 6px;
+    }
+    .bar{
+      flex:1;
+      border-radius:12px;
+      background: rgba(18,163,105,.18);
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(18,163,105,.20);
+    }
+    .bar::after{
+      content:'';
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: var(--h, 40%);
+      background: linear-gradient(180deg, rgba(18,163,105,.35), rgba(18,163,105,.75));
+      border-radius:12px;
+    }
+    .bar-label{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--border);
+    }
+    th, td{
+      padding:12px 12px;
+      text-align:left;
+      font-size:13px;
+      border-bottom:1px solid var(--border);
+      background:#fff;
+    }
+    th{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      background: #fafbff;
+    }
+    tr:last-child td{ border-bottom:none; }
+    .status{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      display:inline-block;
+    }
+    .status.ok{ border-color: rgba(22,163,74,.25); color: var(--good); background: rgba(22,163,74,.08); }
+    .status.pending{ border-color: rgba(245,158,11,.25); color: var(--warn); background: rgba(245,158,11,.10); }
+    .status.issue{ border-color: rgba(239,68,68,.25); color: var(--bad); background: rgba(239,68,68,.10); }
+
+    /* Right column cards */
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+    .item{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .item strong{ font-size:13px; }
+    .item p{ margin:4px 0 0; font-size:12px; color:var(--muted); }
+    .tag{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color: var(--muted);
+      background:#fff;
+      white-space:nowrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 1060px){
+      .app{ grid-template-columns: 1fr; }
+      .sidebar{ position:sticky; top:0; z-index:10; border-right:none; border-bottom:1px solid var(--border); }
+      .grid{ grid-template-columns: 1fr; }
+      .row{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px){
+      .row{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction:column; align-items:stretch; }
+      .actions{ justify-content:space-between; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <!-- Replace with your real logo (png/svg). Example: assets/wareef.svg -->
+        <img id="wareefLogo" alt="Wareef logo" src="WAREEF_LOGO_URL" />
+        <div class="name">
+          <strong>WAREEF</strong>
+          <span>Operations Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="active" href="#"><span>Overview</span><span class="pill">Live</span></a>
+        <a href="#"><span>Sales</span><span></span></a>
+        <a href="#"><span>Inventory</span><span></span></a>
+        <a href="#"><span>Customers</span><span></span></a>
+        <a href="#"><span>Reports</span><span></span></a>
+        <a href="#"><span>Settings</span><span></span></a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="search">
+          <span class="icon">🔎</span>
+          <input id="searchInput" placeholder="Search orders, customers, SKUs..." />
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btnExport">Export</button>
+          <button class="btn primary" id="btnRefresh">Refresh</button>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="row">
+        <div class="card">
+          <h3>Total Revenue</h3>
+          <div class="metric">
+            <div class="value" id="kpiRevenue">$128,430</div>
+            <div class="delta good" id="kpiRevenueDelta">+12.4%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Orders</h3>
+          <div class="metric">
+            <div class="value" id="kpiOrders">2,348</div>
+            <div class="delta good" id="kpiOrdersDelta">+4.1%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Returns</h3>
+          <div class="metric">
+            <div class="value" id="kpiReturns">86</div>
+            <div class="delta warn" id="kpiReturnsDelta">+1.2%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Alerts</h3>
+          <div class="metric">
+            <div class="value" id="kpiAlerts">3</div>
+            <div class="delta bad" id="kpiAlertsDelta">Needs review</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Left column -->
+        <section class="card">
+          <div class="section-title">
+            <h2>Weekly Performance</h2>
+            <span id="rangeLabel">Last 7 days</span>
+          </div>
+
+          <div class="bars" aria-label="Weekly performance chart">
+            <div class="bar" style="--h:55%"></div>
+            <div class="bar" style="--h:68%"></div>
+            <div class="bar" style="--h:42%"></div>
+            <div class="bar" style="--h:74%"></div>
+            <div class="bar" style="--h:63%"></div>
+            <div class="bar" style="--h:80%"></div>
+            <div class="bar" style="--h:58%"></div>
+          </div>
+          <div class="bar-label">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+
+          <div style="height:14px"></div>
+
+          <div class="section-title">
+            <h2>Latest Orders</h2>
+            <span id="ordersCountLabel">5 items</span>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </section>
+
+        <!-- Right column -->
+        <section class="stack">
+          <div class="card">
+            <div class="section-title">
+              <h2>Quick Insights</h2>
+              <span>Auto-generated</span>
+            </div>
+            <div class="list" id="insightsList"></div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <h2>Notifications</h2>
+              <span id="notifCount">0</span>
+            </div>
+            <div class="list" id="notifList"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ====== Demo Data (replace with API calls) ======
+    const orders = [
+      { id: "WR-10492", customer: "Al-Nour Co.", amount: 1840, status: "ok" },
+      { id: "WR-10493", customer: "Riyadh Mart", amount: 320, status: "pending" },
+      { id: "WR-10494", customer: "Green Valley", amount: 910, status: "ok" },
+      { id: "WR-10495", customer: "Sahara Trading", amount: 120, status: "issue" },
+      { id: "WR-10496", customer: "Al-Faisal Group", amount: 2630, status: "ok" },
+    ];
+
+    const insights = [
+      { title: "Revenue trending up", note: "Weekend performance improved vs last week.", tag: "Good" },
+      { title: "Returns slightly higher", note: "Check top 3 SKUs with frequent returns.", tag: "Watch" },
+      { title: "Low stock warning", note: "4 items below reorder threshold.", tag: "Action" },
+    ];
+
+    const notifications = [
+      { title: "SKU WRF-221 low stock", note: "Only 12 units remaining.", tag: "Inventory" },
+      { title: "Failed payment", note: "Order WR-10495 needs follow-up.", tag: "Billing" },
+    ];
+
+    // ====== Rendering ======
+    function fmtMoney(n){
+      return new Intl.NumberFormat("en-US", { style:"currency", currency:"USD" }).format(n);
+    }
+
+    function statusChip(status){
+      const map = {
+        ok:      { label: "Completed", cls: "ok" },
+        pending: { label: "Pending",   cls: "pending" },
+        issue:   { label: "Issue",     cls: "issue" },
+      };
+      const s = map[status] || { label:"Unknown", cls:"pending" };
+      return `<span class="status ${s.cls}">${s.label}</span>`;
+    }
+
+    function renderOrders(list){
+      const tbody = document.getElementById("ordersBody");
+      tbody.innerHTML = list.map(o => `
+        <tr>
+          <td><strong>${o.id}</strong></td>
+          <td>${o.customer}</td>
+          <td>${fmtMoney(o.amount)}</td>
+          <td>${statusChip(o.status)}</td>
+        </tr>
+      `).join("");
+      document.getElementById("ordersCountLabel").textContent = `${list.length} items`;
+    }
+
+    function renderCards(list, targetId){
+      const el = document.getElementById(targetId);
+      el.innerHTML = list.map(x => `
+        <div class="item">
+          <div>
+            <strong>${x.title}</strong>
+            <p>${x.note}</p>
+          </div>
+          <span class="tag">${x.tag}</span>
+        </div>
+      `).join("");
+    }
+
+    // ====== Interactions ======
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if(!q){
+        renderOrders(orders);
+        return;
+      }
+      const filtered = orders.filter(o =>
+        o.id.toLowerCase().includes(q) ||
+        o.customer.toLowerCase().includes(q)
+      );
+      renderOrders(filtered);
+    });
+
+    document.getElementById("btnRefresh").addEventListener("click", () => {
+      // placeholder for API refresh
+      alert("Refreshed (demo). Replace with your API call.");
+    });
+
+    document.getElementById("btnExport").addEventListener("click", () => {
+      // quick CSV export of current visible table
+      const rows = Array.from(document.querySelectorAll("#ordersBody tr")).map(tr =>
+        Array.from(tr.querySelectorAll("td")).map(td => td.innerText.replace(/\s+/g," ").trim())
+      );
+      const header = ["Order","Customer","Amount","Status"];
+      const csv = [header, ...rows].map(r => r.map(v => `"${v.replaceAll('"','""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "wareef_orders.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // ====== Init ======
+    renderOrders(orders);
+    renderCards(insights, "insightsList");
+    renderCards(notifications, "notifList");
+    document.getElementById("notifCount").textContent = String(notifications.length);
+
+    // If logo URL is not set, show a fallback
+    const logo = document.getElementById("wareefLogo");
+    if(logo.getAttribute("src") === "WAREEF_LOGO_URL"){
+      // fallback: simple inline SVG as data URI
+      const svg = encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+          <rect x="6" y="6" width="52" height="52" rx="14" fill="#12a369"/>
+          <path d="M31 19c-8 6-8 18 0 26c8-6 8-18 0-26Z" fill="#fff" opacity=".95"/>
+          <path d="M34 22c6 4 7 12 3 18c-6-4-7-12-3-18Z" fill="#fff" opacity=".95"/>
+        </svg>
+      `);
+      logo.src = `data:image/svg+xml,${svg}`;
+    }
+  </script>
+</body>
+</html>
