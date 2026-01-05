@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wareef Dashboard (HTML)</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --shadow: 0 10px 30px rgba(15,23,42,.06);
+      --radius: 18px;
+      --green:#16a34a;
+      --green-2:#e9f7ef;
+      --amber:#f59e0b;
+      --amber-2:#fff7ed;
+      --rose:#fb7185;
+      --rose-2:#fff1f2;
+      --blue:#0ea5e9;
+      --blue-2:#ecfeff;
+      --dark:#0b1220;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .hidden{display:none !important;}
+
+    .app{
+      max-width: 1400px;
+      margin: 0 auto;
+      display:flex;
+      min-height: 100vh;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width: 260px;
+      flex: 0 0 260px;
+    }
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .sidebar .panel{padding:16px;}
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    /* UPDATED logo to show your base64 image */
+    .logo{
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      flex: 0 0 40px;
+    }
+    .logo img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+    .dot{width:14px;height:14px;border-radius:50%;background:#0f9d58;} /* kept (unused now) */
+
+    .brand h1{font-size:14px;margin:0;font-weight:800;letter-spacing:.2px}
+    .brand p{font-size:12px;margin:2px 0 0;color:var(--muted)}
+
+    .sidebar-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 14px;
+    }
+    .sidebar-top .title{font-size:12px;font-weight:700;color:#475569}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+      line-height: 1;
+      white-space:nowrap;
+    }
+    .pill.success{background:var(--green-2);border-color:#c9efd8;color:#0f7a3a;}
+    .pill.warning{background:var(--amber-2);border-color:#fed7aa;color:#b45309;}
+    .pill.danger{background:var(--rose-2);border-color:#fecdd3;color:#be123c;}
+    .pill.info{background:var(--blue-2);border-color:#bae6fd;color:#0369a1;}
+
+    .nav{
+      margin-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .nav button{
+      border:0;
+      background:transparent;
+      text-align:left;
+      padding:10px 12px;
+      border-radius: 14px;
+      font-size:14px;
+      color:#334155;
+      cursor:pointer;
+    }
+    .nav button:hover{background:#f1f5f9;}
+    .nav button.active{
+      background:#eafaf0;
+      color:#0f7a3a;
+      border:1px solid #c9efd8;
+    }
+
+    /* Main */
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .search{
+      flex:1;
+      position:relative;
+    }
+    .search input{
+      width:100%;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      background:var(--card);
+      box-shadow: var(--shadow);
+      padding: 14px 14px;
+      font-size: 14px;
+      outline:none;
+    }
+    .btn{
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      font-weight:800;
+      font-size: 13px;
+      cursor:pointer;
+      color:#334155;
+    }
+    .btn:hover{background:#f8fafc;}
+    .btn.primary{
+      background:#eafaf0;
+      border-color:#c9efd8;
+      color:#0f7a3a;
+    }
+    .btn.dark{
+      background: var(--dark);
+      color:white;
+      border-color: transparent;
+    }
+
+    .metrics{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .metric{ padding: 16px; }
+    .metric .label{font-size:12px;color:var(--muted);font-weight:700;}
+    .metric .row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+    .metric .value{font-size:26px;font-weight:900;letter-spacing:-.3px;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .card{ padding: 16px; }
+    .card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-title{font-size:14px;font-weight:900;}
+    .card-right{font-size:12px;color:var(--muted);font-weight:700;}
+    .chart-wrap{ height: 260px; margin-top: 6px; }
+    canvas{max-width:100%}
+
+    .insights .item, .notifications .item{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: white;
+    }
+    .insights .item + .item, .notifications .item + .item{margin-top: 10px;}
+    .item-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .item-title{font-size:14px;font-weight:900;}
+    .item-sub{font-size:12px;color:var(--muted);margin-top:6px;font-weight:600;}
+
+    .bottom{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:16px;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius: 16px;
+      border:1px solid var(--line);
+    }
+    thead th{
+      background:#f8fafc;
+      color:#475569;
+      font-size:12px;
+      font-weight:900;
+      padding: 12px 12px;
+      text-align:left;
+    }
+    tbody td{
+      padding: 12px 12px;
+      border-top:1px solid var(--line);
+      font-size:13px;
+      color:#334155;
+      font-weight:600;
+    }
+    tbody td:first-child{font-weight:900;color:#0f172a;}
+
+    .two-charts{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .mini-chart{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: white;
+    }
+    .mini-chart .t{font-weight:900;font-size:13px;margin-bottom:8px;}
+    .mini-chart .h{height:220px;}
+
+    /* Login */
+    .login-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+    }
+    .login{
+      width: 420px;
+      padding: 18px;
+    }
+    .login h2{margin:14px 0 4px;font-size:18px;}
+    .login p{margin:0;color:var(--muted);font-size:13px;font-weight:600;}
+    .field{margin-top:12px;}
+    .field label{display:block;font-size:12px;font-weight:900;color:#475569;margin-bottom:6px;}
+    .field input{
+      width:100%;
+      border-radius: var(--radius);
+      border:1px solid var(--line);
+      padding: 12px 14px;
+      font-size:14px;
+      outline:none;
+      background:white;
+    }
+    .error{
+      margin-top: 10px;
+      border-radius: 16px;
+      border:1px solid #fecdd3;
+      background:#fff1f2;
+      color:#be123c;
+      padding: 10px 12px;
+      font-weight:800;
+      font-size:13px;
+    }
+
+    @media (max-width: 1100px){
+      .metrics{grid-template-columns: repeat(2, minmax(0,1fr));}
+      .grid{grid-template-columns: 1fr;}
+      .bottom{grid-template-columns: 1fr;}
+      .two-charts{grid-template-columns: 1fr;}
+      .sidebar{display:none;}
+      .app{padding: 12px;}
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // put the base64 image in one place so we can reuse it
+    const WAREEF_LOGO_SRC =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAADJCAMAAAA93N8MAAABdFBMVEX///8AWysafjcAWSr3+fYxhEnG2ccYfTcAXix+q4gAXy0slz4qkz0Wejbe6N4AdysigDupx6sAYy4njjx4qX8DdzK71sPY5NYghDmevp6GsIxBjFeVuZlWlWTv9O8SdjU0paIwmU01o5MzqLo1oYYznnEjiTo0pq4zoo7q9fUynGgzm140n32HspELbzM0paQymlgyqLU0n3llnnADaTAxqsI0pJkxm1sxmVDm7eavyLLe7N1ViGUAVyEAaigAURLL5OZMpGXP489VhWRdm2q11bacs6CuwrMiZDkAhy++zsEAXSEATRgAfCu+3diDwrhnvdK73umjz8YApMJntaaTzN1MqpQYnI0ZnZgYoKZMkF6DxM5BpYh/vqm42MyZyrdvusCZzM5gr4yLxsV5uZhbs7VPqHuQxKdiroF9upCHwa9An1Bnsph8uYJirW+nzqptl3pOolsATQBAck4AfiBlim+Epo86gE8eXjRnlnFKdlcAaAzJsCgvAAAaUElEQVR4nNVdi1/bVrI25siCYD0cLCtGtrLshmyB0HJxb0EmBkIM4RHSNpubJvSRNJsmZZtnaZJt88/fc3RmZEl+SWPzyPfb/TXIkn0+z5yZOXNmjjOZgVAwzcJg70DD7J2v732F+BvgC8A/A/wP4h+A/0V88+2gQyirWnkYVNJh9u797z77O8dXcfpt5P/Zjfu/BuVeNozTp37n3mc+8RD3v/Wh3sacY8BRMM9jQ6GTAnc+E4hSD7i3k4+KPUzdtm2XNgTmerat6/wNbK/rTV70RcafiLyFzt9BvEf3d4jjzpUQ9XbuwPyLOPU493/9X8Y0PpbS085k3Pq4Y2azlpU1rB5Kz2fEQujPnGkcBmri5opKVs1yWMZ4UuVxP5PU+3Fvt3Ux7rMZxTQo1O2aqgFMs4epK5hqJUxd0apIUi+a8nEObSop9btXgHof7l1V/h8odE7dIlDPOappGabjHFabhzTquqOZVtZxFI7k1PX7VwLun30XwoMIHkbQgfo3s0TqtqJpTgFsRL2Xg+tOnYtcKch/162k1Nl/rgTU/37v7sZscmw8DnMXro1CnRUtrRqYqwKJetnSDm24WkpM/c6VK8j93p20vuX7FvdvxN8U6rZlmi1DXacovHuoKcHn5pJSZy8C6nfT+6WNlqXbEH9TqE9ZVshsk6jnFLUYDD4x9bvXrgD3O2nHnBHUkfv3/t8U6o6m5lp/kahHrhcSUneR+RUK88y3ga2b9f8mUGdKWN+J1DWz9dBzNRn1R0j9bsoR+5h9jNQhfCdQ9xRTGZi6GaJeSEb9zg/A/D4peP4WXdw3UugU6q45BKlHqCdSePbjNSn1az+lHLBE4N1xzUaZ64eaFZrrJQr1Sph6Mr/+09I1n/u1H0lC/xmDuu/xCoV6hQ+19ReRupaSuvvDNUn9B5KN2whi+Vm8RKGuG6bZWmr1U/jI8gWpl02z9ZUkCmkeCaFz7tf+k3a4Aux7jOUDoZOjuWLwF3Gua63rSfy6ew0x2+fOjtgI1jGtx/nKLdfjkc7Q+YIjyMn1pF5RtXDyLqBeUrTWOjUJ9R+XgDnJxs0+fgjcQ3mpqmnV079V3TSVevDv7tRZUVXCShVQ5+s2xw6u9qf+09KS5P4i/WA57jyUy9d/Pg7pzIIWNllJwcYtUwHCvajbjtlimAkvX4paS+z9qbsvkDrJxrFg7b4RHoxhqpQ3a/IlTNG3dT2os3FNq4VJ8dAdqOsfTbMGV+2+1H+aWfK5LxEd20Ng/jgyulpsdElRNE1NLeqsh3Nza5ZpRSxJaL3OQ1nNLBbq9UKBa0Bv6t7SkqT+g97rtm7YwJTNw6iJtLnJKtouSwuvKBJL2WKuoHDq7a+7Xq7KmdciH9aSOueucPKWgNYvS/N8RnJfekRhzh6D0B/+HHuFmyxNKY6nxUJNZtVMvpg57PB6scpfs6rRVCvXkNZ3kStmDUtTVa0fdR2Z/0BS9w3M1P3S5hdLfAB8BGlhhtDhZUHIqMUUtBCJA5meK1QWKhWu8JVepJ4C9RmSY2OPgfrDDhsubuVQOQE4NTv+QVXN6hBFFCy1l4MtzUjqMzTH9vMDmaB9+Ljj18vs3LCx2WFro8LdQocPb2pKj7DKezID3OPfZCLMBrnpDcrjw4FeUU2jfWPWW1C0Yo9M26M5SX3mEWmm//uB5P7w35SnSeCKxKXk2jk53b1y0TG5wQeO+vOKj3Jh/JBHhr2EPuNjaeZJ8s2pEDZwT+IhKfYnQTcsR0xj2FPiC1PuDmo4/Lopd29UYWDNXjP96ZzkTrVxuB8Td2wnCD1rHYrABfbc6oZqOpVAcPXApZhOrdf6aROZPyGN4g7uRbU7tpODXqtx0rlaTYq0VKzUQ2ZK506tXC4XCvVcz51e9wlQn6PZuF8eAHVS7E+F6zKxjexK48Tju+jL/O8EZqs0J6nPPSWN4e4D2ILs7NjOM/RnQH2JZONmH8D+6xcbHV4t1UvRLyRXj2Zt3NYd3FtHRsBaXjxWoMD0VqCANr3tijD/iC7Lkufzc5I7KXjPfA3MH3R0bEXDiMwiVzGMyHeRUw1HXvBM1SiGX9IPgkiWh26V1vuUhMeSyMr1ul2pKngJPtAtFFuXOsfw+pyPmbknpMqPjWDXvaONK1lWJMqwDTP6XdSDPFyZuycrPAaRnrQQquZgtq2iqFpwXRHvlnNUNbjy0X9/r2m2LnWpqngyL7nPkQo/2NdQcfCgs2PzTK0Z/pvHmlY4bcOKGHZ7QpJWOMnIqVcLEiJgUSFg4StxpVYuIPg1W9XMZgUvlP27DjXNmQpu6ujfSsicZuPuQLHFg1862zhW0yIKzhfR5mHogqtoWSnpgmkWa5oSErtuhBKzbsHRLBGQ2k5bSM5pxrMZfA1X62O6vGdInWbjsKjwbxtd7uDxVmigriUmbkjjbQO0wuW07bp5OTQ9ItR9zmIF1l5lwd+jGP/iq5rSz1M/Aubzz/vc2Bl3vwPqX3dzbLmIgpcspaaEiz8raAtymlblSq+GSMSoZ3KG5jA2pWkxKfFFaVyhdUftVzSlo9Cf0YSOzL/a6HaL19RCCl60arnD8Ki4JH3piInBx18JK3OceobfYwvtiH3ElNUm4ZwS2ZXphKfL8/N0G5e5h9S770izBbU1MFfQroUKZTxNa/qzmyutwr8QXbNafqiNesGyysmolzj13lLfXJyfF9znn5ICsTtBXVmPx8PVzbailjNlqyVZvsyQuaNxzfJnMJ+jwffSRr1kaFNsSNR/XZbU5zZ73tYF7B7U1H3XK3i3Q9OuLpbOdihfVNTkipIbekm5ZLR2a9qo54Q9Gw71LV/oHETHBuWE393r9SmsqR6CINm45bgZZgZZE68Kr1U0GCpzfMX30Ua9zhV+ONT1G8tAnRTHzd7H+uGNnvfxKAYU3Kv6efNaoNQ5RbolbtlxEoScYSczl0s+13sMiT0HoS/TOg2+xjrSro5NImdZ4Ii5oxMfVQ/YYal/3dSC1JITpNLj1G3VVFzf/yOkW+LU68EleSunXgwutQvWnpdCX/6VJHQPS2j7CD3DDLDiQqJC3HoWXD0bl8J2a60kElsIZBijrh9qRkGEPqYDUKRST/HIFi85SL11SWn3Xkcry8s+eaJjg/Lh7/qWWlW1rK/gPF73c8WsKv/rbwWLLyWnmk5rN1zRxoFrmDqrK5qwEYI6Zp9gVTLVuqIZAfXWXW2pudL0ok99mejYgtLpvrdyd+x/u55pSSoVS67ecqqv3GIJE4pNixqYRUmdiVr+XKFpmaqIB4TCVxB1oK4Ug0sB9SpeWYgbAnZjZVFwX54n7S7O3oMC4p6OTYIvrHzKOXRcJVVSLVv+BV01tYV6gCaWVEjqbpHrrGlpmlEUIx2CmXs9vbgouK8Qg3esne5j4wTcQ6ngU5Yqv2a+EBFrFhG8ev51MwqweaDwuqznL8rsy+DR3KoQOqe+uEizcfeR+kb/m1lF8xXcRHPnFlXh3jxVE1bJ5cyiu2mmXI7gXM9ZZrYVCw9KnR35Ql9cXKHZuKBk/uskd+dUkYLQLQs3PCt+EMcjFDE1y1rIEXHodZgggZmr8EgfiQxMfXNxxZf6yhHJxunXgPr9RAs+/VBtRjY8ubVeEPZMSNc7jKceuAdQxfsG1LnzC2rBBqXOfp1e8bnfIAXvmXtQNp6whpgruKNzpgFFvpzm01nRHC8SziDqhq8OLecWyswMSn1rcsWnvnKUaOhx/IR14/cTPlDmIQs7VIOUEavxlaxtaXx4nEpbdkkoghvx63VNc6SJdIsDUWdC5gLztATFC6S+kfAJkTnIOSF/w+d3veznm3LcxrWNQlYChkOaBcuS1Ug82tPaainUuMXqSv0oL5lPvk449CiCkvnE5aQun+xFJbTjySVebIqqPh7OxNYo/suOmARh6qypGXK611WtEr2b3xcv0upGfXNFSn36Bs3GBSXzG4mf4VqqhNORTJTKiPnuqZ0qScXKNBcNZG1TM/3nuc1UYqFp01JjX18X6uwoP+1zn6Y5th9R6Cl2a+oiagknoWtiO7wi5qnmdLpfrN+jyxc+3Q+xhlBzpjBMLXuiplYLxbJTXlfqpWkBzpzo2JaA+v0UW8qe2EgJbz2I74IL1lU719AykbWJrdwWZB6ez20nvvtiN1s7Lf76oDN190be5z59YzX50EN4ISvmU/ZJOGZUsXWuBdy1cdPvdDS15axR94xsmLrbNLMyuLfLNQUCQKiR9eo1B0PBrE/d7ED99YRkPk2zcT/JivkrKWuIPb78ioxFNFf7lzs7Gb5e81jsRc9/xIcr/i3B4lfE58QflbeAzKeJwfuLa9AtcKp1BEPBS6C+S7Nxj7BkntQncaYogczzr0iP69eAOq2G+CzhvsSZTiqbafVJ0MoQzhKlibyv8HlagsJegm6B+8QDKM4O3m/5vOCeJzq2J1Ayv0RrADxLHO3mfe55YvAuy2ivLdFqiM8SqxMTPvX8K5pje4I185+cjcu8BOa7tATFIyyZ//Qc29aElPrES9LjOpSNL/1AWuWfJbxXEz73id9oNu4pUid1tp8pXk/4yE8Qg3comV968Qk6Nkl94hVJX9mzGegW+PQc20tgPrFFevwR1NESm2POEpu7KHTS4/ozKJmfSe3YmEvHMGqt2Stgvkuycew5dgukDd733twUuN4V1evVGJohFMu0xUYIW8iclnm3oW48dXPM3nqD4+LF/X3+P44vEWtRXL5sRWEIZMX/m4ORX70B1H+j+WTsk5hJu8rfGbvAcRHwZRifh3C5BXnUmqgJyEoYB1ODBBJHuwPZOFFDLPsk0k6+nbGxEPWLCagD+RD37EGTzn0VrTsteHefzclugfTNMW8akvuF3tzbpB7hfumgSbZ3aOPyVMcmqRMKx/ULI1LlLwyg8pw74egDH4FjowXv9rM5euH4diOq8hH2HalrIfJI/ZJBW3G5b1HfSerOnmLJPCUr5f0VUXnfzO+vtSFi2qV55/9tcTdIRx9g8D6xSwveN1Hmv5KMza2RscDK73+5vWcnRa7QNIxA57OEg04yqyj0tzQ7+etAzTGZzM1A7PvXU6qdVzENlLuSPj/CBnRsW8tAnVZfxy3d+hhM9/1b6R9uBpaufS+6HzZ382DjSEN3oWx8jtb1KfBmXar8hf09wuePo9wPUh9r9HZCUp+m2cjny5I6sXBcwNuRKn9hf5vwNCsaYOWdlLLb2s3nBwre50HsAwSTtxpS5Rtp57oP5gD3lKeGe2/9bByXPEnd2VMsHKcZCgn3HXBfp4g9Yxto6VLNuSOZhJ3YJQbv2CxAKxxH7O1I6mP7JN2ZAu4Hbe1sPbC5ItPPxOCd/QpCpzo2xBtU+TeUp3UFzXzyYbBXcrsln6fZuK0V6Bag1Z604K6PSO4XCEY+kymglTcTS3ALmE/QbJy3vCibBeYHTpVs3x7zuTduUtTPraGlS+rcGYg8v0LLvB+JknlOfJG2LxuGexNU/mL6sCYjSuoxlk8ohAoInRq83/Ar5ueXbwwh8743JlW+cUyydAug8gmXMZvTIPTfKB/GI+AV6BYYxLEF7/YeLd170uOKBXJP0p7lvkSh08xzCUrmFwdzbAj9GCzd7yTDkUNLl8S5b+1OSubE4F32SSwuztO8QxsCS3edMh6MZ7MJLB2P4yZ97iu0ob+eHKhboB3s4ojkPkazdOjc+5/OWtmdnBTcicH7qqyY59Rp3qED9sC5N26SShMqhvwpEyNeDx+H5zPn1N/SZurRtOQ+PbhjQzA/puPc90mWLnOIKl/peRuP43zqk8QKitwidAvQCsc7w96RKj92gWTp7GSWbusqMH9LGqT7EhslBgzeo3jfkNwb10mPtyxdD3l4NyYHEnppGroFjoZaR+Adj0ju66RQXkfnftAjR1lBdU/8Cz8RuCvTkvvikBwb4tY6qPwOKaarY4LW7Pr4JjCfJJYGHuWxW4D0eA8cg8qPkZIWuIzJGl13Y9DGEft6VvPQKLEy9AI57uB87mPHpLe2NUzLd7F0pT/AyBHXHUdQOE4squyJ97d97jyUJ03FCoq98wakO39VUv+DbOOgReQEzs7zuMr7cqdZumAZ0zlHObV71ee+SyubcV9ho8SQbZzE9oik3jgmfbEl3ItyOqj85spVgcmrk7TcyhaUzOeHFbxH4aKlo6Vn2Xj3ZQwr7vrUr+7SfuzS/Q2ETlz29MXebbB0OzRL53RdxpQOJPNJWmmgn76WQic9ngBvgDstaZEpWOjc44eIXkXQciurE36zwHR+5cTqQb0dmO47NEvX7LKMqYDQd2l78UwWjk9PE/csEmF7XXJvvCN9vfZHtdMyZtMEmf9Bi+NKQbfACR4K691EB0dKWvBljAqWLvTVseLBJSl02kx1XwH1iROycRK3RqXYR/Zp7RhOh2VM6eolSZ2YoHi9C90CJ+PYArxrgMrTLF0di2xaXf9e9eCS5E5bZnsT0C3w9kSFLiotRiT3HVLswWqo8sEypiKYc+qptiRDeIndAifm2BAilBfcG29II7VNEDvuxng+c86duMwOiiqnT7zRgR2DytPSs3wZA2I/9IfKmkCdWFvYKhw/QceG2GuA2GkbUXwZA3KXB9ZlLwFoQsPCcWK3QDq4A1o6voyR3MWhLV4TiP9Bqa7DjiiBE7ZxEns7YOnWaWIfB+7C0hVQ3WlxXFBUedKODfEeVZ6WntUdUPmPORu1PV2xTYDAxr0d2nZLb7g7GNiQQnlxEg+ofM24JOd6772Jrgg6ok4gK9UZt34HsZMqLTLMF7tgb4CRaz/WKBE2kflvp9bBx26iypOSFmIZA9yzWSH2A5pjajm2U7FxEnsjoPIXaJnfKSNUMZ81qrRRBDbuNBwbggWWjlRTJpYxIe6XaDZOD7oFTlHofqWF5L5OG3Y93BvU71T0Ljhtx4bYvj3qc28ckx5nxUDljSpt0uin7dgCHA9o6ZRA7LQ4LvMKuwVOzbEh9hoodprQqhbovEN7PuiIenvqP1XE3qDKkzaihNSBO+nMb/dV/vQdG8LekdRHxiiWbtzCnjCDJPbXedktcKqOLcB2Y4Rs6eqhXsCepRZdsArdAhP507ZxPry/YLqnT896VSvUCniQPikH5/RwG3c2P0q2J2f7SOM4bQhdMSJtkEra8a9CIe0EsQJjcFwPLF265zwj2vnbvdSiC7Bb4PQdG8JrjEq5p9yIalqa3/2qWsC91y9zdkDQLXAmNk7iPYr9TRqVL0HTs6WIhI0a343pC+9GfqDDmYYCHSzdSCOF2LmNkx3fH+v+MkZNG9K9ngTmtP7uIWEbVL6xk/yZgmR+2WqyTN3QwNIlF7t0bAJnZeN8sHeS+1jySgsbut0tcaYwK4LYjVr/JwFH2BF1ZjZOwubUpc4njcn+XAPq/nmxtgmWLnHjqygtlFvKZ32YGA/lpconDOVzwPwyxK8VQ3LvUlTWjldAffIUtlt6wwvEnsjSsQ9AfQ1WLcy0Ui1jtqBbgHiy6lBx67bk3riZRAEra/Jwi7VDvGJbENQlysWvvpU1lXna4UzDhfsOVD6JpbM/AHUr4MmmDMk90TKmgoXjJ76lnAR7/wWV3+nroNj4mjzTZC2Uj7MdCOqM/ssYG4U+vO6WgfAGVP523/Ts3hqc5/Ih7A/KFqYt+or9CGvmz9ixIVwU+2gfS8cu40k20eCtCtO97zJm8w/Qd1p/9wlgex0tXe8RlaXQP1+L/WiKbcAarp+lA3WfnBxqd8sgcI9HQe49kxb6BzjAaC3OcCGwdD2/uy1U93Pg2BB76OB6VlqMo9DH46/wZQxw77WM8W5AtwCxtPBEwN4D9/UeSYtbKPMOS5WSBSpv9oiHRc287AsawpCHBnsHVL7RdejedRR6B8m6RRR798ZXe1F2C0wSD2c6KWzfltwbN7vesSYPLFv7s9N8DvLyB93SD1Azz6nTfqzzxMBGR4F7F0vnruFZbZ09YAWsvFHt9ptmsltgcrd5Xhwb4haKvctG1J/78py6dhsHUFDluxSXBDXzqY91Ommwd8i9o6Xbw4P6Pu82UXPS0qldnHsZa+bTH+Z14vBDeWHpOrWHeNeB+H5X78XGUeU7LWNWF0Hmu+fxiPv3KPYOofw2nkP7oftE5csYuSnRaRkTNEoQa61OFt5fYOl+bzNk9peo770masFSpdwP2sS+eQmEPowzV04A0tKNjoy2bUT9iULvmcViNRR7vMSE1aBRglgzf+Jgx+jgYkmL3D4I/UPviWp/hL0oM6YcJewWiP9Y5LnB3u/APebgjkHo+/0m6pQhuceXMVAyfzXFKV6nDbR06xHFfr9/8aKY7Psf+j3voqU7iERsU7KI+CrhlMpTg44qPxaydPYxnL+73z8YCUoOwseQ2goUEV89r+ousA3xbCiUZ0Logvt+gvJCVjTA0oV+xXwBmB/QGl5PCe5fYOVblRZ7+3D4ch8bJ2ErUHHQOqlsE5mfu+A9ir1RkPsoBKzsQwOOnE62K1cwJHcDV/UudsdcOnfBewzvQOwYym+vS+KJDyBWwNKp4A6CRolUe/BnAb0BYpeVFvbOmDxwO/EpvDkQO5RaeCbUzMd9/TmETFoI7tuM3drBU6f/TPq8WMYAd+7FNx1olDjPjg3h3kTut9fX1+HQ6QsXkyeVdHDu3NRxxrJsnONsqsTS4dZ/MWMDJxilPXm5HvttAV/o5ywr1RmQtAi4X0h7HKm/jIlwzx6c2+A9Cvt2TOxpTznQP0Z/VoHL/fwG71G8j3FP3SYyZaDYsdX/U5jpAu7OaFTl0yaVxG5MWOXNgU8CPjVA0gK4E86xqbdKaHskac8j3LCla/QvOWiDv4wJxN6esDrH2PtvIPbRMUr7p44qn01UbXGe8D5QeeJJZf4yRq7hiF3OZwVvFKkfE02UgpbuEwjeo/ArLThu0xr8+TIGnPun49gCQNKC1gIosCCbRAi/mHPWkJaOdi6fD2npjE8ieI/Cr7ToVWXRF7nLlpW4dPZcgW3v8CX7IO+Qc5Sp01+2/D/kNuBk7THThgAAAABJRU5ErkJggg==';
+  </script>
+
+  <!-- LOGIN -->
+  <section id="loginPage" class="login-wrap hidden">
+    <div class="panel login">
+      <div class="brand">
+        <div class="logo" aria-label="Wareef logo">
+          <img id="logoLogin" alt="WAREEF logo" />
+        </div>
+        <div>
+          <h1>WAREEF</h1>
+          <p>Sign in to continue</p>
+        </div>
+      </div>
+
+      <h2>Login</h2>
+      <p>Demo login: any non-empty email/password.</p>
+
+      <form id="loginForm">
+        <div class="field">
+          <label>Email</label>
+          <input id="email" type="email" placeholder="admin@wareef.com" value="admin@wareef.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="••••••••" value="password" />
+        </div>
+        <div id="loginError" class="error hidden">Please enter email and password.</div>
+        <button class="btn dark" style="margin-top:14px;width:100%;" type="submit">Login</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboardPage" class="hidden">
+    <div class="app">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="brand">
+            <div class="logo" aria-label="Wareef logo">
+              <img id="logoSidebar" alt="WAREEF logo" />
+            </div>
+            <div>
+              <h1>WAREEF</h1>
+              <p>Operations Dashboard</p>
+            </div>
+          </div>
+
+          <div class="sidebar-top">
+            <div class="title">Overview</div>
+            <span class="pill success">Live</span>
+          </div>
+
+          <div class="nav" id="nav">
+            <button class="active" data-key="overview">Overview</button>
+            <button data-key="sales">Sales</button>
+            <button data-key="inventory">Inventory</button>
+            <button data-key="customers">Customers</button>
+            <button data-key="reports">Reports</button>
+            <button data-key="settings">Settings</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <!-- Topbar -->
+        <div class="topbar">
+          <div class="search">
+            <input placeholder="Search orders, customers, SKUs..." />
+          </div>
+          <button class="btn">Export</button>
+          <button class="btn primary">Refresh</button>
+          <button class="btn dark" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics">
+          <div class="panel metric">
+            <div class="label">Total Revenue</div>
+            <div class="row">
+              <div class="value">$128,430</div>
+              <span class="pill success">+12.4%</span>
+            </div>
+          </div>
+          <div class="panel metric">
+            <div class="label">Orders</div>
+            <div class="row">
+              <div class="value">2,348</div>
+              <span class="pill success">+4.1%</span>
+            </div>
+          </div>
+          <div class="panel metric">
+            <div class="label">Returns</div>
+            <div class="row">
+              <div class="value">86</div>
+              <span class="pill warning">+1.2%</span>
+            </div>
+          </div>
+          <div class="panel metric">
+            <div class="label">Alerts</div>
+            <div class="row">
+              <div class="value">3</div>
+              <span class="pill danger">Needs review</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mid grid -->
+        <div class="grid">
+          <!-- Weekly Performance (line) -->
+          <div class="panel card">
+            <div class="card-head">
+              <div class="card-title">Weekly Performance</div>
+              <div class="card-right">Last 7 days</div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Quick Insights -->
+          <div class="panel card insights">
+            <div class="card-head">
+              <div class="card-title">Quick Insights</div>
+              <div class="card-right">Auto-generated</div>
+            </div>
+
+            <div class="item">
+              <div class="item-top">
+                <div class="item-title">Revenue trending up</div>
+                <span class="pill success">Good</span>
+              </div>
+              <div class="item-sub">Weekend performance improved vs last week.</div>
+            </div>
+
+            <div class="item">
+              <div class="item-top">
+                <div class="item-title">Returns slightly higher</div>
+                <span class="pill warning">Watch</span>
+              </div>
+              <div class="item-sub">Check top 3 SKUs with frequent returns.</div>
+            </div>
+
+            <div class="item">
+              <div class="item-top">
+                <div class="item-title">Low stock warning</div>
+                <span class="pill info">Action</span>
+              </div>
+              <div class="item-sub">4 items below reorder threshold.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom grid -->
+        <div class="bottom">
+          <!-- Latest Orders + charts -->
+          <div class="panel card">
+            <div class="card-head">
+              <div class="card-title">Latest Orders</div>
+              <div class="card-right">5 items</div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>WR-10492</td><td>Al-Nour Co.</td><td>$1,840.00</td>
+                  <td><span class="pill success">Completed</span></td>
+                </tr>
+                <tr>
+                  <td>WR-10493</td><td>Riyadh Mart</td><td>$320.00</td>
+                  <td><span class="pill warning">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>WR-10494</td><td>Green Valley</td><td>$910.00</td>
+                  <td><span class="pill success">Completed</span></td>
+                </tr>
+                <tr>
+                  <td>WR-10495</td><td>Sahara Trading</td><td>$120.00</td>
+                  <td><span class="pill danger">Issue</span></td>
+                </tr>
+                <tr>
+                  <td>WR-10496</td><td>Al-Faisal Group</td><td>$2,630.00</td>
+                  <td><span class="pill success">Completed</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="two-charts">
+              <div class="mini-chart">
+                <div class="t">Units by Category</div>
+                <div class="h"><canvas id="barChart"></canvas></div>
+              </div>
+              <div class="mini-chart">
+                <div class="t">Order Status Mix</div>
+                <div class="h"><canvas id="pieChart"></canvas></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="panel card notifications">
+            <div class="card-head">
+              <div class="card-title">Notifications</div>
+              <div class="card-right">2</div>
+            </div>
+
+            <div class="item">
+              <div class="item-top">
+                <div class="item-title">SKU WRF-221 low stock</div>
+                <span class="pill info">Inventory</span>
+              </div>
+              <div class="item-sub">Only 12 units remaining.</div>
+            </div>
+
+            <div class="item">
+              <div class="item-top">
+                <div class="item-title">Failed payment</div>
+                <span class="pill warning">Billing</span>
+              </div>
+              <div class="item-sub">Order WR-10495 needs follow-up.</div>
+            </div>
+
+            <div style="margin-top:12px;font-size:12px;color:var(--muted);font-weight:700;">
+              Active section:
+              <span id="activeSection" style="color:#334155;font-weight:900;">overview</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <script>
+    // Apply the base64 logo to both login + sidebar images
+    const logoLogin = document.getElementById("logoLogin");
+    const logoSidebar = document.getElementById("logoSidebar");
+    if (logoLogin) logoLogin.src = WAREEF_LOGO_SRC;
+    if (logoSidebar) logoSidebar.src = WAREEF_LOGO_SRC;
+
+    // ---------------------------
+    // Simple demo auth
+    // ---------------------------
+    const loginPage = document.getElementById("loginPage");
+    const dashboardPage = document.getElementById("dashboardPage");
+
+    function showApp() {
+      const authed = localStorage.getItem("demo_authed") === "true";
+      if (authed) {
+        loginPage.classList.add("hidden");
+        dashboardPage.classList.remove("hidden");
+        initChartsOnce();
+      } else {
+        dashboardPage.classList.add("hidden");
+        loginPage.classList.remove("hidden");
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      const err = document.getElementById("loginError");
+
+      if (!email || !pass) {
+        err.classList.remove("hidden");
+        return;
+      }
+      err.classList.add("hidden");
+      localStorage.setItem("demo_authed", "true");
+      showApp();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("demo_authed");
+      location.reload();
+    });
+
+    // ---------------------------
+    // Sidebar active state
+    // ---------------------------
+    const nav = document.getElementById("nav");
+    const activeSection = document.getElementById("activeSection");
+
+    nav.addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      [...nav.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
+      e.target.classList.add("active");
+      activeSection.textContent = e.target.dataset.key || "overview";
+    });
+
+    // ---------------------------
+    // Charts (Chart.js)
+    // ---------------------------
+    let chartsInitialized = false;
+    let lineChart, barChart, pieChart;
+
+    function initChartsOnce() {
+      if (chartsInitialized) return;
+      chartsInitialized = true;
+
+      // LINE
+      const lineCtx = document.getElementById("lineChart");
+      lineChart = new Chart(lineCtx, {
+        type: "line",
+        data: {
+          labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+          datasets: [{
+            label: "Revenue",
+            data: [12000,14800,13100,16200,17000,20500,18900],
+            tension: 0.35,
+            borderWidth: 3,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => " " + new Intl.NumberFormat(undefined, {style:"currency", currency:"USD"}).format(ctx.parsed.y)
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { weight: "700" } } },
+            y: {
+              grid: { color: "#e2e8f0" },
+              ticks: {
+                font: { weight: "700" },
+                callback: (v) => "$" + (v/1000) + "k"
+              }
+            }
+          }
+        }
+      });
+
+      // BAR
+      const barCtx = document.getElementById("barChart");
+      barChart = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: ["Beverage","Snacks","Household","Personal","Dairy"],
+          datasets: [{ label: "Units", data: [420,610,280,360,510], borderWidth: 1 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { weight: "700" } } },
+            y: { grid: { color: "#e2e8f0" }, ticks: { font: { weight: "700" } } }
+          }
+        }
+      });
+
+      // PIE
+      const pieCtx = document.getElementById("pieChart");
+      pieChart = new Chart(pieCtx, {
+        type: "pie",
+        data: { labels: ["Completed","Pending","Issue"], datasets: [{ data: [62,24,14] }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "bottom", labels: { font: { weight: "700" } } } }
+        }
+      });
+    }
+
+    // boot
+    showApp();
+  </script>
+</body>
+</html>
