@@ -1,0 +1,62 @@
+%{
+#include <stdio.h>
+int line_no = 1;
+%}
+
+LETTER      [a-zA-Z_]
+DIGIT       [0-9]
+ID          {LETTER}({LETTER}|{DIGIT})*
+INTCONST    {DIGIT}+
+FLOATCONST  {DIGIT}+"."{DIGIT}+
+
+%%
+
+"int"           { printf("KEYWORD(int)\n"); }
+"float"         { printf("KEYWORD(float)\n"); }
+"if"            { printf("KEYWORD(if)\n"); }
+"else"          { printf("KEYWORD(else)\n"); }
+"while"         { printf("KEYWORD(while)\n"); }
+"print"         { printf("KEYWORD(print)\n"); }
+
+"=="            { printf("RELOP(==)\n"); }
+"!="            { printf("RELOP(!=)\n"); }
+"<="            { printf("RELOP(<=)\n"); }
+">="            { printf("RELOP(>=)\n"); }
+"<"             { printf("RELOP(<)\n"); }
+">"             { printf("RELOP(>)\n"); }
+
+"&&"            { printf("BOOL_OP(&&)\n"); }
+"||"            { printf("BOOL_OP(||)\n"); }
+"!"             { printf("BOOL_OP(!)\n"); }
+
+"="             { printf("ASSIGN_OP(=)\n"); }
+
+"+"             { printf("ARITH_OP(+)\n"); }
+"-"             { printf("ARITH_OP(-)\n"); }
+"*"             { printf("ARITH_OP(*)\n"); }
+"/"             { printf("ARITH_OP(/)\n"); }
+"%"             { printf("ARITH_OP(%%)\n"); }
+
+";"             { printf("SEMICOLON(;)\n"); }
+"("             { printf("LPAREN(()\n"); }
+")"             { printf("RPAREN())\n"); }
+"{"             { printf("LBRACE({)\n"); }
+"}"             { printf("RBRACE(})\n"); }
+
+{FLOATCONST}    { printf("FLOAT_CONST(%s)\n", yytext); }
+{INTCONST}      { printf("INT_CONST(%s)\n", yytext); }
+{ID}            { printf("IDENTIFIER(%s)\n", yytext); }
+
+[ \t\r]+        { }
+\n              { line_no++; }
+
+.               { printf("LEXICAL_ERROR(line %d): %s\n", line_no, yytext); }
+
+%%
+
+int yywrap() { return 1; }
+
+int main() {
+    yylex();
+    return 0;
+}
