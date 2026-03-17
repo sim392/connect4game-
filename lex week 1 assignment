@@ -1,0 +1,196 @@
+%{
+#include <stdio.h>
+#include <string.h>
+ 
+int line_no = 1;
+ 
+void print_token(const char *name, const char *lexeme) {
+    printf("<%s, \"%s\", line %d>\n", name, lexeme, line_no);
+}
+ 
+%}
+ 
+CONST    [A-Za-z_][A-Za-z0-9_]*
+INT      [0-9]+
+FRACT    [0-9]*"."[0-9]+|[0-9]+"."[0-9]*
+WS       [ \t\r]+
+ 
+%%
+ 
+ 
+{WS}               { /* ignore spaces/tabs */ }
+\n                 { line_no++; }
+ 
+ 
+"//".*                         { print_token("COMMENT:", yytext); }
+"/*"([^*]|\*+[^*/])*\*+"/"    { print_token("COMMENT:", yytext); }
+ 
+ 
+"\""                { print_token("DOUBLE QUOTE", yytext); }
+"\'"                { print_token("SINGLE QUOTE", yytext); }
+"\\\""              { print_token("ESCAPED_QUOTE", yytext); }
+ 
+ 
+ 
+"int"               { print_token("KEYWORD", yytext); }
+"float"             { print_token("KEYWORD", yytext); }
+"if"                { print_token("KEYWORD", yytext); }
+"else"              { print_token("KEYWORD", yytext); }
+"while"             { print_token("KEYWORD", yytext); }
+"for"               { print_token("KEYWORD", yytext); }
+"return"            { print_token("KEYWORD", yytext); }
+"continue"          { print_token("KEYWORD", yytext); }
+"switch"            { print_token("KEYWORD", yytext); }
+"case"              { print_token("KEYWORD", yytext); }
+"def"               { print_token("KEYWORD", yytext); }
+"char"              { print_token("KEYWORD", yytext); }
+"const"             { print_token("KEYWORD", yytext); }
+"default"           { print_token("KEYWORD", yytext); }
+"do"                { print_token("KEYWORD", yytext); }
+"double"            { print_token("KEYWORD", yytext); }
+"enum"              { print_token("KEYWORD", yytext); }
+"extern"            { print_token("KEYWORD", yytext); }
+"goto"              { print_token("KEYWORD", yytext); }
+"long"              { print_token("KEYWORD", yytext); }
+"register"          { print_token("KEYWORD", yytext); }
+"short"             { print_token("KEYWORD", yytext); }
+"signed"            { print_token("KEYWORD", yytext); }
+"sizeof"            { print_token("KEYWORD", yytext); }
+"static"            { print_token("KEYWORD", yytext); }
+"struct"            { print_token("KEYWORD", yytext); }
+"typedef"           { print_token("KEYWORD", yytext); }
+"union"             { print_token("KEYWORD", yytext); }
+"unsigned"          { print_token("KEYWORD", yytext); }
+"void"              { print_token("KEYWORD", yytext); }
+"volatile"          { print_token("KEYWORD", yytext); }
+ 
+ 
+"main"              { print_token("FUNCTION",yytext); }
+"printf"            { print_token("FUNCTION",yytext); }
+"scanf"             { print_token("FUNCTION",yytext); }
+"fprintf"           { print_token("FUNCTION", yytext); }
+"sprintf"           { print_token("FUNCTION", yytext); }
+"snprintf"          { print_token("FUNCTION", yytext); }
+"fopen"             { print_token("FUNCTION", yytext); }
+"fclose"            { print_token("FUNCTION", yytext); }
+"fread"             { print_token("FUNCTION", yytext); }
+"fwrite"            { print_token("FUNCTION", yytext); }
+"fgets"             { print_token("FUNCTION", yytext); }
+"fputs"             { print_token("FUNCTION", yytext); }
+"getchar"           { print_token("FUNCTION", yytext); }
+"putchar"           { print_token("FUNCTION", yytext); }
+"puts"              { print_token("FUNCTION", yytext); }
+ 
+"malloc"            { print_token("FUNCTION", yytext); }
+"calloc"            { print_token("FUNCTION", yytext); }
+"realloc"           { print_token("FUNCTION", yytext); }
+"free"              { print_token("FUNCTION", yytext); }
+"exit"              { print_token("FUNCTION", yytext); }
+"abort"             { print_token("FUNCTION", yytext); }
+"system"            { print_token("FUNCTION", yytext); }
+"qsort"             { print_token("FUNCTION", yytext); }
+"bsearch"           { print_token("FUNCTION", yytext); }
+"rand"              { print_token("FUNCTION", yytext); }
+"srand"             { print_token("FUNCTION", yytext); }
+ 
+"strlen"            { print_token("FUNCTION", yytext); }
+"strcpy"            { print_token("FUNCTION", yytext); }
+"strncpy"           { print_token("FUNCTION", yytext); }
+"strcat"            { print_token("FUNCTION", yytext); }
+"strncat"           { print_token("FUNCTION", yytext); }
+"strcmp"            { print_token("FUNCTION", yytext); }
+"strncmp"           { print_token("FUNCTION", yytext); }
+"strchr"            { print_token("FUNCTION", yytext); }
+"strrchr"           { print_token("FUNCTION", yytext); }
+"strstr"            { print_token("FUNCTION", yytext); }
+"strtok"            { print_token("FUNCTION", yytext); }
+ 
+"memcpy"            { print_token("FUNCTION", yytext); }
+"memmove"           { print_token("FUNCTION", yytext); }
+"memset"            { print_token("FUNCTION", yytext); }
+"memcmp"            { print_token("FUNCTION", yytext); }
+ 
+"isalpha"           { print_token("FUNCTION", yytext); }
+"isdigit"           { print_token("FUNCTION", yytext); }
+"isalnum"           { print_token("FUNCTION", yytext); }
+"isspace"           { print_token("FUNCTION", yytext); }
+"islower"           { print_token("FUNCTION", yytext); }
+"isupper"           { print_token("FUNCTION", yytext); }
+"tolower"           { print_token("FUNCTION", yytext); }
+"toupper"           { print_token("FUNCTION", yytext); }
+ 
+"sin"               { print_token("FUNCTION", yytext); }
+"cos"               { print_token("FUNCTION", yytext); }
+"tan"               { print_token("FUNCTION", yytext); }
+"sqrt"              { print_token("FUNCTION", yytext); }
+"pow"               { print_token("FUNCTION", yytext); }
+"exp"               { print_token("FUNCTION", yytext); }
+"log"               { print_token("FUNCTION", yytext); }
+"fabs"              { print_token("FUNCTION", yytext); }
+ 
+"time"              { print_token("FUNCTION", yytext); }
+"difftime"          { print_token("FUNCTION", yytext); }
+"clock"             { print_token("FUNCTION", yytext); }
+"mktime"            { print_token("FUNCTION", yytext); }
+"strftime"          { print_token("FUNCTION", yytext); }
+ 
+ 
+ 
+{CONST}             { print_token("GEN_CONST", yytext); }
+{FRACT}             { print_token("FLOAT_CONST", yytext); }
+{INT}               { print_token("INT_CONST", yytext); }
+ 
+ 
+ 
+ 
+"&&"                { print_token("AND", yytext); }
+"||"                { print_token("OR", yytext); }
+ 
+ 
+"<="                { print_token("LE", yytext); }
+">="                { print_token("GE", yytext); }
+"=="                { print_token("EQ", yytext); }
+"!="                { print_token("NE", yytext); }
+"<"                 { print_token("LT", yytext); }
+">"                 { print_token("GT", yytext); } 
+ 
+ 
+"+="                { print_token("PLUS_EQ", yytext); }
+"-="                { print_token("MINUS_EQ", yytext); }
+"="                 { print_token("ASSIGN", yytext); }
+ 
+ 
+"++"                { print_token("INC", yytext); }
+"--"                { print_token("DEC", yytext); }
+ 
+"+"                 { print_token("PLUS", yytext); }
+"-"                 { print_token("MINUS", yytext); }
+"*"                 { print_token("MULT", yytext); }
+"/"                 { print_token("DIV", yytext); }
+"%"                 { print_token("MOD", yytext); }
+ 
+ 
+"!"                 { print_token("NOT", yytext); }
+ 
+ 
+"("                 { print_token("LPAREN", yytext); }
+")"                 { print_token("RPAREN", yytext); }
+"{"                 { print_token("LBRACE", yytext); }
+"}"                 { print_token("RBRACE", yytext); }
+"["                 { print_token("LBRACKET", yytext); }
+"]"                 { print_token("RBRACKET", yytext); }
+","                 { print_token("COMMA", yytext); }
+";"                 { print_token("SEMICOLON", yytext); }
+ 
+ 
+.                   {printf("Error: unexpected character '%s' at line %d\n",yytext, line_no);}
+ 
+ 
+%%
+ 
+int yywrap(void) { return 1; }
+ 
+int main(int argc, char **argv) {
+    yylex();  
+    return 0;
+}
